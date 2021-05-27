@@ -2,7 +2,7 @@
 
 This image marries 3 containers into a locked down Docker-based management cli for [craftcms](https://craftcms.com/) services - accessable via SSH:
 * [atmoz/sftp](https://github.com/atmoz/sftp)
-* [witten/borgmatic](hhttps://github.com/witten/borgmatic)
+* [witten/borgmatic](https://github.com/witten/borgmatic)
 * [craftcms/cli](https://github.com/craftcms/docker)
 
 The idea is to provide a minimal separate management container for craftcms services that allows:
