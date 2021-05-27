@@ -1,0 +1,161 @@
+#!/bin/bash
+set -Eeo pipefail
+
+# global vars and defaults read from ENV
+SNAPSHOTS_DIR="${SNAPSHOTS_DIR:=$(echo "/mnt/snapshots")}"
+SRC_DIR="${SRC_DIR:=$(echo "/app/current")}"
+
+TMP_RESTORE_UUID="${TMP_RESTORE_UUID:=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "restored")}" # Default ".restored"
+TMP_RESTORED_BASE_DIR="${TMP_RESTORED_BASE_DIR:=$(echo "/tmp/.${TMP_RESTORE_UUID}")}"
+TMP_RESTORED_SRC_DIR="${TMP_RESTORED_SRC_DIR:=$(echo "${TMP_RESTORED_BASE_DIR}${SRC_DIR}")}"
+HOTSWAP_BASE_DIR="${HOTSWAP_BASE_DIR:=$(dirname "$SRC_DIR")}"
+HOTSWAP_RESTORED_DIR="${HOTSWAP_RESTORED_DIR:=$(echo "${HOTSWAP_BASE_DIR}/.${TMP_RESTORE_UUID}")}"
+HOTSWAP_OLD_DIR="${HOTSWAP_OLD_DIR:=$(echo "${HOTSWAP_BASE_DIR}/.${TMP_RESTORE_UUID}_old")}"
+
+# runtime set vars
+snapshot=""  # Default to empty snapshot
+
+usage() {
+    echo "dal-craft-cli snapshots utility"
+    echo "Usage:"
+    echo "  snapshots -h                      Display this help message."
+    echo "  snapshots print-config            Print current config vars."
+    echo "  snapshots init                    Initialize '${SNAPSHOTS_DIR}/{.borg, .repo}'."
+    echo "  snapshots list                    List available snapshots."
+    echo "  snapshots info                    Info about snapshot size."
+    echo "  snapshots create                  Create a new snapshot from '${SRC_DIR}/**' and prune old snapshots."
+    echo "  snapshots export <snapshot>       Export <snapshot> to '${SNAPSHOTS_DIR}/<snapshot>.tar.gz'."
+    echo "  snapshots restore <snapshot>      Restore <snapshot> to '${SRC_DIR}/**' (hotswap)."
+}
+
+print-config() {
+    echo "Using:"
+    echo "  SNAPSHOTS_DIR:            \"${SNAPSHOTS_DIR}\""
+    echo "  SRC_DIR:                  \"${SRC_DIR}\""
+    echo "  "
+    echo "  TMP_RESTORE_UUID:         \"${TMP_RESTORE_UUID}\""
+    echo "  TMP_RESTORED_BASE_DIR:    \"${TMP_RESTORED_BASE_DIR}\""
+    echo "  TMP_RESTORED_SRC_DIR:     \"${TMP_RESTORED_SRC_DIR}\""
+    echo "  HOTSWAP_BASE_DIR:         \"${HOTSWAP_BASE_DIR}\""
+    echo "  HOTSWAP_RESTORED_DIR:     \"${HOTSWAP_RESTORED_DIR}\""
+    echo "  HOTSWAP_OLD_DIR:          \"${HOTSWAP_OLD_DIR}\""
+}
+
+check_var_snapshot() {
+    # is non empty
+    if [[ -z "${snapshot// }" ]]; then
+    echo "Invalid Option: <snapshot> not supplied." 1>&2
+    exit 1
+    fi
+
+    # has no spaces
+    if [[ $snapshot = *[[:space:]]* ]]; then
+    echo "Invalid Option: <snapshot> contains disallowed spaces: \"${snapshot}\"" 1>&2
+    exit 1
+    fi
+}
+
+restore_err_cleanup() {
+    rm -rf "${TMP_RESTORED_BASE_DIR}" > /dev/null 2>&1
+}
+
+# no options supplied?
+if [ -z "$1" ]; then
+    usage
+    exit 1
+fi
+
+# Parse options to the `snapshot` command
+while getopts ":h" opt; do
+    case ${opt} in
+    h )
+        usage
+        exit 0
+        ;;
+    \? )
+    echo "Invalid Option: -$OPTARG" 1>&2
+    exit 1
+    ;;
+    esac
+done
+shift $((OPTIND -1))
+
+subcommand=$1; shift  # Remove 'snapshot' from the argument list
+case "$subcommand" in
+
+    init)
+    set -Eeox pipefail
+    borgmatic --init -e none --verbosity 2
+    ;;
+
+    list)
+    set -Eeox pipefail
+    borgmatic --init -e none > /dev/null 2>&1
+    borgmatic list
+    ;;
+
+    info)
+    set -Eeox pipefail
+    borgmatic --init -e none > /dev/null 2>&1
+    borgmatic info
+    ;;
+
+    print-config)
+    print-config
+    ;;
+
+    create)
+    set -Eeox pipefail
+    borgmatic --init -e none > /dev/null 2>&1
+    borgmatic --verbosity 1
+    ;;
+
+    export)
+    snapshot=$1
+    check_var_snapshot
+
+    target="${SNAPSHOTS_DIR}/${snapshot}.tar.gz"
+    echo "Extracting to: \"${target}\"..."
+
+    set -Eeox pipefail
+    borgmatic export-tar --destination - --archive "${snapshot}" | gzip > $target
+    ;;
+
+    restore)
+    snapshot=$1
+    check_var_snapshot
+
+    print-config
+
+    trap restore_err_cleanup ERR
+
+    set -Eeox pipefail
+
+    # prepare to /tmp
+    rm -rf "${TMP_RESTORED_BASE_DIR}" && mkdir -p "${TMP_RESTORED_BASE_DIR}"
+
+    # unpack to /tmp
+    borgmatic export-tar --destination - --archive "${snapshot}" | tar -xf - -C "${TMP_RESTORED_BASE_DIR}"
+
+    # copy to /app
+    cp --verbose -rf "${TMP_RESTORED_SRC_DIR}" "${HOTSWAP_RESTORED_DIR}"
+
+    # switch previous snapshot with current
+    mv "${SRC_DIR}" "${HOTSWAP_OLD_DIR}" && mv "${HOTSWAP_RESTORED_DIR}" "${SRC_DIR}"
+
+    # restore database
+    borgmatic restore --archive "${snapshot}" --verbosity 1
+
+    # remove from /tmp
+    rm -rf "${TMP_RESTORED_BASE_DIR}"
+
+    # remove old in /app
+    rm -rf "${HOTSWAP_OLD_DIR}"
+    ;;
+
+    *)
+    usage
+    exit 1
+    ;;
+
+esac
