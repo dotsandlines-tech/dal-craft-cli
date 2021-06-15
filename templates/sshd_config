@@ -1,17 +1,17 @@
 # Secure defaults
 # See: https://stribika.github.io/2015/01/04/secure-secure-shell.html
 Protocol 2
-HostKey /etc/ssh/ssh_host_ed25519_key
-HostKey /etc/ssh/ssh_host_rsa_key
+HostKey ${SSHD_HOST_KEY_ED25519}
+HostKey ${SSHD_HOST_KEY_RSA}
 
 # Faster connection
 # See: https://github.com/atmoz/sftp/issues/11
-UseDNS no
+UseDNS ${SSHD_USE_DNS}
 
 # Limited access
-PermitRootLogin no
-X11Forwarding no
-AllowTcpForwarding no
+PermitRootLogin ${SSHD_PERMIT_ROOT_LOGIN}
+X11Forwarding ${SSHD_X11_FORWARDING}
+AllowTcpForwarding ${SSHD_ALLOW_TCP_FORWARDING}
 
 # Force sftp and chroot jail
 Subsystem sftp internal-sftp

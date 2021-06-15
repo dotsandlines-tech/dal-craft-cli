@@ -172,6 +172,23 @@ hooks:
       options: --default-character-set=utf8 --add-drop-database --add-locks --set-charset --create-options --add-drop-table --lock-tables
 ```
 
+### TCP forwarding
+
+To enable TCP forwarding via SSH through this container you need to set the `ENV_VAR` `SSHD_ALLOW_TCP_FORWARDING: "yes"`. This is for example needed to directly access a mySQL/MariaDB database through a SSH tunnel via this container.
+
+#### Other SSHD defaults
+
+See `templates/sshd_config`, the following envs will be set and a substituted template written to `/etc/ssh/sshd_config`.
+
+Default values:
+```bash
+SSHD_HOST_KEY_ED25519="/etc/ssh/ssh_host_ed25519_key"
+SSHD_HOST_KEY_RSA="/etc/ssh/ssh_host_rsa_key"
+SSHD_USE_DNS="no"
+SSHD_ALLOW_TCP_FORWARDING="no"
+SSHD_X11_FORWARDING="no"
+SSHD_PERMIT_ROOT_LOGIN="no"
+```
 
 ### Snapshots configuration
 

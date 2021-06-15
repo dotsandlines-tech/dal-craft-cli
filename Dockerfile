@@ -64,6 +64,8 @@ USER root
 
 RUN apk update && \
     apk add --no-cache \
+    # envsubst
+    gettext \
     # openssh specific deps
     bash shadow openssh-server rsync sudo \
     # borgmatic specific deps (https://github.com/b3vis/docker-borgmatic/blob/master/base/Dockerfile)
@@ -80,7 +82,7 @@ COPY --from=borgmatic-builder /usr/bin/generate-borgmatic-config /usr/bin/
 COPY --from=borgmatic-builder /usr/bin/upgrade-borgmatic-config /usr/bin/
 
 # openssh files
-COPY files/sshd_config /etc/ssh/sshd_config
+COPY templates/sshd_config /opt/templates/sshd_config
 COPY files/create-sftp-user /usr/local/bin/
 COPY files/entrypoint /
 

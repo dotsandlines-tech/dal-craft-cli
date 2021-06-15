@@ -12,6 +12,17 @@ userConfPath="/etc/sftp/users.conf"
 userConfPathLegacy="/etc/sftp-users.conf"
 userConfFinalPath="/var/run/sftp/users.conf"
 
+# envsubst defaults
+export SSHD_HOST_KEY_ED25519="${SSHD_HOST_KEY_ED25519:=$(echo "/etc/ssh/ssh_host_ed25519_key")}"
+export SSHD_HOST_KEY_RSA="${SSHD_HOST_KEY_RSA:=$(echo "/etc/ssh/ssh_host_rsa_key")}"
+export SSHD_USE_DNS="${SSHD_USE_DNS:=$(echo "no")}"
+export SSHD_ALLOW_TCP_FORWARDING="${SSHD_ALLOW_TCP_FORWARDING:=$(echo "no")}"
+export SSHD_X11_FORWARDING="${SSHD_X11_FORWARDING:=$(echo "no")}"
+export SSHD_PERMIT_ROOT_LOGIN="${SSHD_PERMIT_ROOT_LOGIN:=$(echo "no")}"
+
+# envsubst write templates
+envsubst "$(printf '${%s} ' ${!SSHD_*})" < "/opt/templates/sshd_config" > "/etc/ssh/sshd_config"
+
 function log() {
     echo "[$0] $*" >&2
 }
