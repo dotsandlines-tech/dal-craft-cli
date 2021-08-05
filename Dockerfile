@@ -39,7 +39,7 @@ RUN apk upgrade --no-cache \
 # --- https://github.com/craftcms/docker
 # --- https://github.com/atmoz/sftp/blob/master/Dockerfile
 ### -----------------------
-FROM craftcms/cli:7.4 as cli
+FROM craftcms/cli:8.0 as cli
 
 # switch back to the root user (we will spawn the actual queue through the **www-data** user later.)
 # this user is used to actually run the container as we will spawn a ssh-server
@@ -74,7 +74,7 @@ RUN apk update && \
     && rm -f /etc/ssh/ssh_host_*key*
 
 # borgmatch files from other stage
-COPY --from=borgmatic-builder /usr/lib/python3.8/site-packages /usr/lib/python3.8/
+COPY --from=borgmatic-builder /usr/lib/python3.9/site-packages /usr/lib/python3.9/
 COPY --from=borgmatic-builder /usr/bin/borg /usr/bin/
 COPY --from=borgmatic-builder /usr/bin/borgfs /usr/bin/
 COPY --from=borgmatic-builder /usr/bin/borgmatic /usr/bin/
