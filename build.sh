@@ -1,5 +1,5 @@
 #!/bin/sh
 
-IMAGE_NAME=docker-craftcms-cli:php-8.0-borgmatic-1.5.13
+IMAGE_NAME=dotsandlines/dal-craft-cli:v1.1.1-php8.0
 docker build -t ${IMAGE_NAME} .
 

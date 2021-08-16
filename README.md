@@ -231,6 +231,14 @@ export PHP_ASC_URL="${PHP_ASC_URL}"
 export PHP_CPPFLAGS="${PHP_CPPFLAGS}"
 ```
 
+## Development: How to publish new images
+
+1. Replace the `Stage: cli` base image within the `Dockerfile` to your new variant from [craftcms/cli](https://hub.docker.com/r/craftcms/cli/tags?page=1&ordering=last_updated).
+2. Replace the `IMAGE_NAME` within `build.sh`.
+3. Build the image locally --> `./build.sh`.
+4. Push into https://hub.docker.com/r/dotsandlines/dal-craft-cli --> `docker push dotsandlines/dal-craft-cli:<TAG>` (after executing `docker login` to your registry)
+5. Push this git repository as git tag --> `git tag -a <TAG> -m "<msg>"`
+
 ## License
 
 [MIT](LICENSE)
