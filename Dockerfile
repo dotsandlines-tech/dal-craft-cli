@@ -39,7 +39,7 @@ RUN apk upgrade --no-cache \
 # --- https://github.com/craftcms/docker
 # --- https://github.com/atmoz/sftp/blob/master/Dockerfile
 ### -----------------------
-FROM craftcms/cli:8.0@sha256:a9fdf9f5787fff7e9cabfd885799bad59c999b16cd9786c4d31a34221feac910 as cli
+FROM craftcms/cli:8.0@sha256:4fb034cbd8517e878737964bd89205c6e53be2041235aed624d62265e51484d3 as cli
 
 # switch back to the root user (we will spawn the actual queue through the **www-data** user later.)
 # this user is used to actually run the container as we will spawn a ssh-server
