@@ -10,7 +10,7 @@ LABEL maintainer='infrastructure+dal-craft-cli@dotsandlines.io'
 ARG BORG_VERSION=1.1.16
 
 # https://pypi.org/project/borgmatic/#history
-ARG BORGMATIC_VERSION=1.5.13
+ARG BORGMATIC_VERSION=1.5.22
 
 # https://pypi.org/project/llfuse/#history
 ARG LLFUSE_VERSION=1.3.8
@@ -80,6 +80,8 @@ COPY --from=borgmatic-builder /usr/bin/borgfs /usr/bin/
 COPY --from=borgmatic-builder /usr/bin/borgmatic /usr/bin/
 COPY --from=borgmatic-builder /usr/bin/generate-borgmatic-config /usr/bin/
 COPY --from=borgmatic-builder /usr/bin/upgrade-borgmatic-config /usr/bin/
+
+
 
 # openssh files
 COPY templates/sshd_config /opt/templates/sshd_config
