@@ -3,17 +3,17 @@
 # --- Purpose: borgmatic build scripts to later inject into cli image
 # --- https://github.com/b3vis/docker-borgmatic/blob/master/base/Dockerfile
 ### -----------------------
-FROM alpine:latest@sha256:bc41182d7ef5ffc53a40b044e725193bc10142a1243f395ee852a8d9730fc2ad as borgmatic-builder
+FROM alpine:3.17.3@sha256:b6ca290b6b4cdcca5b3db3ffa338ee0285c11744b4a6abaa9627746ee3291d8d as borgmatic-builder
 LABEL maintainer='infrastructure+dal-craft-cli@dotsandlines.io'
 
 # https://pypi.org/project/borgbackup/
-ARG BORG_VERSION=1.1.16
+ARG BORG_VERSION=1.2.4
 
 # https://pypi.org/project/borgmatic/#history
-ARG BORGMATIC_VERSION=1.5.22
+ARG BORGMATIC_VERSION=1.7.12
 
 # https://pypi.org/project/llfuse/#history
-ARG LLFUSE_VERSION=1.3.8
+ARG LLFUSE_VERSION=1.4.2
 
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
@@ -40,7 +40,7 @@ RUN apk upgrade --no-cache \
 # --- https://github.com/atmoz/sftp/blob/master/Dockerfile
 ### -----------------------
 
-FROM craftcms/cli:8.1@sha256:1f972a7493e056a21bcc4604c0dd44c497797d9fd2fecb61f5919c263228f2ab as cli
+FROM craftcms/cli:8.1@sha256:e06c34f64a2ae9adb8f8f23107c3fec83c4fdfdf8fc9d74e5152b2d2b23a9a81 as cli
 
 # switch back to the root user (we will spawn the actual queue through the **www-data** user later.)
 # this user is used to actually run the container as we will spawn a ssh-server
@@ -65,6 +65,8 @@ USER root
 
 RUN apk update && \
     apk add --no-cache \
+    # borg crypto
+    libcrypto3 \
     # envsubst
     gettext \
     # openssh specific deps
