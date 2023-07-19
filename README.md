@@ -239,6 +239,14 @@ export PHP_CPPFLAGS="${PHP_CPPFLAGS}"
 4. Push into https://hub.docker.com/r/dotsandlines/dal-craft-cli --> `docker push dotsandlines/dal-craft-cli:<TAG>` (after executing `docker login` to your registry)
 5. Push this git repository as git tag --> `git tag -a <TAG> -m "<msg>"`
 
+## How we check for security issues
+
+You can run this locally.
+
+```bash
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL --no-progress --ignore-unfixed dotsandlines/dal-craft-cli:v1.1.6-php8.1
+```
+
 ## License
 
 [MIT](LICENSE)

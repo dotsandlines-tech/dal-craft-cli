@@ -2,6 +2,7 @@
 # --- Stage: borgmatic-builder
 # --- Purpose: borgmatic build scripts to later inject into cli image
 # --- https://github.com/b3vis/docker-borgmatic/blob/master/base/Dockerfile
+# See https://hub.docker.com/_/alpine/tags
 ### -----------------------
 FROM alpine:3.17.3@sha256:b6ca290b6b4cdcca5b3db3ffa338ee0285c11744b4a6abaa9627746ee3291d8d as borgmatic-builder
 LABEL maintainer='infrastructure+dal-craft-cli@dotsandlines.io'
@@ -38,9 +39,12 @@ RUN apk upgrade --no-cache \
 # --- Purpose: Image for actual deployment
 # --- https://github.com/craftcms/docker
 # --- https://github.com/atmoz/sftp/blob/master/Dockerfile
+# See https://hub.docker.com/r/craftcms/cli/tags
+# See https://hub.docker.com/r/craftcms/php-fpm/tags
+# -> craftcms/php-fpm:8.1@sha256:cd9d44f0b3f77d3cd5ffff4f346b23b08bb5166482592093aeb7b60c70dbc750
 ### -----------------------
 
-FROM craftcms/cli:8.1@sha256:e06c34f64a2ae9adb8f8f23107c3fec83c4fdfdf8fc9d74e5152b2d2b23a9a81 as cli
+FROM craftcms/cli:8.1@sha256:85c3703598008ccfb914d98d188ab57a52a04c8b24e3957b9168dcbec51cf353 as cli
 
 # switch back to the root user (we will spawn the actual queue through the **www-data** user later.)
 # this user is used to actually run the container as we will spawn a ssh-server
@@ -77,7 +81,7 @@ RUN apk update && \
     && rm -f /etc/ssh/ssh_host_*key*
 
 # borgmatch files from other stage
-COPY --from=borgmatic-builder /usr/lib/python3.10/site-packages /usr/lib/python3.10/
+COPY --from=borgmatic-builder /usr/lib/python3.11/site-packages /usr/lib/python3.11/
 COPY --from=borgmatic-builder /usr/bin/borg /usr/bin/
 COPY --from=borgmatic-builder /usr/bin/borgfs /usr/bin/
 COPY --from=borgmatic-builder /usr/bin/borgmatic /usr/bin/
