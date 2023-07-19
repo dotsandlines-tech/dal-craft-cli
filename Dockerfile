@@ -81,7 +81,7 @@ RUN apk update && \
     && rm -f /etc/ssh/ssh_host_*key*
 
 # borgmatch files from other stage
-COPY --from=borgmatic-builder /usr/lib/python3.11/site-packages /usr/lib/python3.11/
+COPY --from=borgmatic-builder /usr/lib/python3.10/site-packages /usr/lib/python3.10/
 COPY --from=borgmatic-builder /usr/bin/borg /usr/bin/
 COPY --from=borgmatic-builder /usr/bin/borgfs /usr/bin/
 COPY --from=borgmatic-builder /usr/bin/borgmatic /usr/bin/
