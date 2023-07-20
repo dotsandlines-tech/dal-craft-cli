@@ -11,7 +11,7 @@ LABEL maintainer='infrastructure+dal-craft-cli@dotsandlines.io'
 ARG BORG_VERSION=1.2.4
 
 # https://pypi.org/project/borgmatic/#history
-ARG BORGMATIC_VERSION=1.7.12
+ARG BORGMATIC_VERSION=1.5.24
 
 # https://pypi.org/project/llfuse/#history
 ARG LLFUSE_VERSION=1.4.2
@@ -54,7 +54,7 @@ USER root
 # - changed debian apt-get to alpine apk
 # - added 'shadow' package for useradd command (create-sftp-user script)
 # - added USER root for apk to work correctly
-# - files/create-sftp-user: 
+# - files/create-sftp-user:
 #     - removed 'chown root:root "home/${user}"'
 #     - added .profile file for autosetting ENVs and auto-cd to /app
 #     - customized /etc/motd on start reading namespace from ENV.
@@ -64,7 +64,7 @@ USER root
 # - Install packages
 # - OpenSSH needs /var/run/sshd to run
 # - Remove generic host keys, entrypoint generates unique keys
-# - add 
+# - add
 # - Add craft specific deps: mariadb-client
 
 RUN apk update && \
