@@ -37,14 +37,15 @@ RUN apk upgrade --no-cache \
 ### -----------------------
 # --- Stage: cli
 # --- Purpose: Image for actual deployment
+# --- Current PHP version: 8.1.21
 # --- https://github.com/craftcms/docker
 # --- https://github.com/atmoz/sftp/blob/master/Dockerfile
 # See https://hub.docker.com/r/craftcms/cli/tags
 # See https://hub.docker.com/r/craftcms/php-fpm/tags
-# -> craftcms/php-fpm:8.1@sha256:cd9d44f0b3f77d3cd5ffff4f346b23b08bb5166482592093aeb7b60c70dbc750
+# -> craftcms/php-fpm:8.1@sha256:f90f03706ff9e95eb799ec4d9a063e2df0e99806f8170eab51992945714ecd31
 ### -----------------------
 
-FROM craftcms/cli:8.1@sha256:85c3703598008ccfb914d98d188ab57a52a04c8b24e3957b9168dcbec51cf353 as cli
+FROM craftcms/cli:8.1@sha256:8a935969c66c00d10358183882306828cb947d4fb4349954da43d4f74ea1fa2c as cli
 
 # switch back to the root user (we will spawn the actual queue through the **www-data** user later.)
 # this user is used to actually run the container as we will spawn a ssh-server
