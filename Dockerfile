@@ -77,7 +77,7 @@ RUN apk update && \
     # openssh specific deps
     bash shadow openssh-server rsync sudo \
     # borgmatic specific deps (https://github.com/b3vis/docker-borgmatic/blob/master/base/Dockerfile)
-    tzdata sshfs python3 openssl fuse ca-certificates lz4-libs libacl mariadb-client curl \
+    tzdata sshfs python3 openssl fuse ca-certificates lz4-libs libacl mariadb-connector-c mysql-client curl \
     && mkdir -p /var/run/sshd \
     && rm -f /etc/ssh/ssh_host_*key*
 
