@@ -244,7 +244,7 @@ export PHP_CPPFLAGS="${PHP_CPPFLAGS}"
 You can run this locally.
 
 ```bash
-docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL --no-progress --ignore-unfixed dotsandlines/dal-craft-cli:v1.1.6-php8.1
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL --no-progress --ignore-unfixed dotsandlines/dal-craft-cli:v1.1.11-php8.1
 ```
 
 ## License
