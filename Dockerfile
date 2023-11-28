@@ -37,15 +37,15 @@ RUN apk upgrade --no-cache \
 ### -----------------------
 # --- Stage: cli
 # --- Purpose: Image for actual deployment
-# --- Current PHP version: 8.1.21
+# --- Current PHP version: 8.1.26
 # --- https://github.com/craftcms/docker
 # --- https://github.com/atmoz/sftp/blob/master/Dockerfile
 # See https://hub.docker.com/r/craftcms/cli/tags
 # See https://hub.docker.com/r/craftcms/php-fpm/tags
-# -> craftcms/php-fpm:8.1@sha256:f90f03706ff9e95eb799ec4d9a063e2df0e99806f8170eab51992945714ecd31
+# -> craftcms/php-fpm:8.1@sha256:07eb856bf3ca130444e38b4f6a27045984640352b260cf51b8dbf0f3f16a78fb
 ### -----------------------
 
-FROM craftcms/cli:8.1@sha256:8a935969c66c00d10358183882306828cb947d4fb4349954da43d4f74ea1fa2c as cli
+FROM craftcms/cli:8.1@sha256:33076b49254ced2d61a4ef1de8f4accac13177cdfca3e60d37fd7f45f27f0e35 as cli
 
 # switch back to the root user (we will spawn the actual queue through the **www-data** user later.)
 # this user is used to actually run the container as we will spawn a ssh-server
@@ -66,7 +66,7 @@ USER root
 # - OpenSSH needs /var/run/sshd to run
 # - Remove generic host keys, entrypoint generates unique keys
 # - add
-# - Add craft specific deps: mariadb-client
+# - Add craft specific deps: mariadb-connector-c mysql-client OR mariadb-client
 
 RUN apk update && \
     apk add --no-cache \
@@ -77,7 +77,7 @@ RUN apk update && \
     # openssh specific deps
     bash shadow openssh-server rsync sudo \
     # borgmatic specific deps (https://github.com/b3vis/docker-borgmatic/blob/master/base/Dockerfile)
-    tzdata sshfs python3 openssl fuse ca-certificates lz4-libs libacl mariadb-connector-c mysql-client curl \
+    tzdata sshfs python3 openssl fuse ca-certificates lz4-libs libacl mariadb-client curl \
     && mkdir -p /var/run/sshd \
     && rm -f /etc/ssh/ssh_host_*key*
 
