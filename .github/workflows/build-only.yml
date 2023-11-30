@@ -1,11 +1,11 @@
-name: Build project
+name: Build only project
 
 on:
   push:
     branches: 
       - "**"
-      # - "!master"
-      # - "!dev"
+      - "!master"
+      - "!main"
 
 jobs:
   build-only:
@@ -21,7 +21,6 @@ jobs:
 
       - name: docker build
         run: docker build --file Dockerfile --tag ${{ env.REPO }}:${{ github.sha }} .
-
       # - name: trivy scan
       #   uses: aquasecurity/trivy-action@master
       #   with:
