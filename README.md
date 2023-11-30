@@ -231,13 +231,14 @@ export PHP_ASC_URL="${PHP_ASC_URL}"
 export PHP_CPPFLAGS="${PHP_CPPFLAGS}"
 ```
 
-## Development: How to publish new images
+## Development: How to publish new images (previously)
 
 1. Replace the `Stage: cli` base image within the `Dockerfile` to your new variant from [craftcms/cli](https://hub.docker.com/r/craftcms/cli/tags?page=1&ordering=last_updated).
 2. Replace the `IMAGE_NAME` within `build.sh`.
-3. Build the image locally --> `./build.sh`.
-4. Push into https://hub.docker.com/r/dotsandlines/dal-craft-cli --> `docker push dotsandlines/dal-craft-cli:<TAG>` (after executing `docker login` to your registry)
-5. Push this git repository as git tag --> `git tag -a <TAG> -m "<msg>"`
+3. Push into private working branch and check GitHub Actions **build pipeline** for errors.
+4. Push into `main` branch and check Github Actions **build and publish pipeline** for errors.
+6. Push as new git tag (e.g. `v1.1.13-php8.1`, `git tag -a <TAG> -m "<msg>"`) and check Github Actions **build and publish pipeline** for errors.
+7. Use the published docker image (e.g. `ghcr.io/dotsandlines-tech/dal-craft-cli:v1.1.13-php8.1`)
 
 ## How we check for security issues
 
