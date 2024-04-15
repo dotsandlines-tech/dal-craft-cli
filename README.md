@@ -237,15 +237,15 @@ export PHP_CPPFLAGS="${PHP_CPPFLAGS}"
 2. Replace the `IMAGE_NAME` within `build.sh`.
 3. Push into private working branch and check GitHub Actions **build pipeline** for errors.
 4. Push into `main` branch and check Github Actions **build and publish pipeline** for errors.
-6. Push as new git tag (e.g. `v1.1.13-php8.1`, `git tag -a <TAG> -m "<msg>"`) and check Github Actions **build and publish pipeline** for errors.
-7. Use the published docker image (e.g. `ghcr.io/dotsandlines-tech/dal-craft-cli:v1.1.13-php8.1`)
+5. Push as new git tag (e.g. `v1.1.15-php8.2`, `git tag -a <TAG> -m "<msg>"`) and check Github Actions **build and publish pipeline** for errors.
+6. Use the published docker image (e.g. `ghcr.io/dotsandlines-tech/dal-craft-cli:v1.1.15-php8.2`)
 
 ## How we check for security issues
 
 You can run this locally.
 
 ```bash
-docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL --no-progress --ignore-unfixed dotsandlines/dal-craft-cli:v1.1.11-php8.1
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL --no-progress --ignore-unfixed dotsandlines/dal-craft-cli:v1.1.15-php8.2
 ```
 
 ## License
