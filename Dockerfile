@@ -17,7 +17,7 @@ ARG BORGMATIC_VERSION=1.5.24
 ARG LLFUSE_VERSION=1.4.2
 
 # https://pkgs.alpinelinux.org/packages?name=python3-dev&branch=v3.18&repo=&arch=&maintainer=
-ARG PYTHON_VERSION=3.11.6-r0
+ARG PYTHON_VERSION=3.11.8-r0
 
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
@@ -40,15 +40,15 @@ RUN apk upgrade --no-cache \
 ### -----------------------
 # --- Stage: cli
 # --- Purpose: Image for actual deployment
-# --- Current PHP version: 8.1.21
+# --- Current PHP version: 8.2.18
 # --- https://github.com/craftcms/docker
 # --- https://github.com/atmoz/sftp/blob/master/Dockerfile
 # See https://hub.docker.com/r/craftcms/cli/tags
 # See https://hub.docker.com/r/craftcms/php-fpm/tags
-# -> craftcms/php-fpm:8.1@sha256:237fe0d632672fafd3b91344bf13ab726a21bf40bdfd776fdee7c907793caa48
+# -> craftcms/php-fpm:8.2@sha256:a6b18d3b01e5de2007b74656499162a2c89d63587671ddd58f784951bab91ed9
 ### -----------------------
 
-FROM craftcms/cli:8.1@sha256:05ef30ed43b5457bbd242a101b1daa773d8fa7d30b381411852eae76ba31662c as cli
+FROM craftcms/cli:8.2@sha256:a167f46d5fc984191458898221eb0c4c03dfd9f619143bf028fe22322b5e3f26 as cli
 
 # switch back to the root user (we will spawn the actual queue through the **www-data** user later.)
 # this user is used to actually run the container as we will spawn a ssh-server
