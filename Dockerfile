@@ -48,7 +48,7 @@ COPY files/create-sftp-user /usr/local/bin/
 COPY files/entrypoint /
 
 # snapshots cli
-COPY files/snapshots-a3cloud /usr/bin/snapshots
+COPY --chmod=0755 files/snapshots-a3cloud /usr/bin/snapshots
 
 RUN ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" \
     && KUBECTL_VERSION="1.27.14" \
@@ -145,7 +145,7 @@ COPY --from=borgmatic-builder /usr/bin/upgrade-borgmatic-config /usr/bin/
 RUN borg --version && borgmatic --version
 
 # borgmatic snapshots cli
-COPY files/snapshots-borgmatic /usr/bin/snapshots
+COPY --chmod=0755 files/snapshots-borgmatic /usr/bin/snapshots
 
 EXPOSE 22
 
