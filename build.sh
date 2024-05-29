@@ -1,6 +1,6 @@
 #!/bin/sh
 
-IMAGE_NAME_BASE=dotsandlines/dal-craft-cli:v1.2.0-php8.2
+IMAGE_NAME_BASE=dotsandlines/dal-craft-cli:v1.2.0-php8.1.28
 
 IMAGE_NAME_A3CLOUD=${IMAGE_NAME_BASE}-a3cloud
 docker buildx build --platform linux/amd64 -t ${IMAGE_NAME_A3CLOUD} --target cli-a3cloud .
