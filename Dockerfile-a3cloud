@@ -1,0 +1,57 @@
+### -----------------------
+# --- Stage: cli
+# --- Purpose: Image for actual deployment
+# --- https://github.com/craftcms/docker
+# --- https://github.com/atmoz/sftp/blob/master/Dockerfile
+### -----------------------
+FROM craftcms/cli:8.0@sha256:a9fdf9f5787fff7e9cabfd885799bad59c999b16cd9786c4d31a34221feac910 as cli
+
+# switch back to the root user (we will spawn the actual queue through the **www-data** user later.)
+# this user is used to actually run the container as we will spawn a ssh-server
+# users will then exclusively connect through it.
+USER root
+
+# - changed debian apt-get to alpine apk
+# - added 'shadow' package for useradd command (create-sftp-user script)
+# - added USER root for apk to work correctly
+# - files/create-sftp-user: 
+#     - removed 'chown root:root "home/${user}"'
+#     - added .profile file for autosetting ENVs and auto-cd to /app
+#     - customized /etc/motd on start reading namespace from ENV.
+#
+# ---------------------------------------------------------------
+# Steps done in one RUN layer:
+# - Install packages
+# - OpenSSH needs /var/run/sshd to run
+# - Remove generic host keys, entrypoint generates unique keys
+# - Add some craft specific deps and utils: mysql-client and mariadb-client
+
+RUN apk add --update --no-cache \
+    # envsubst
+    gettext \
+    # openssh specific deps
+    bash shadow openssh-server rsync sudo \
+    # snapshot-a3cloud deps
+    jq yq \
+    # additionals
+    tmux tzdata openssl ca-certificates lz4-libs libacl mysql-client mariadb-client curl \
+    && mkdir -p /var/run/sshd \
+    && rm -f /etc/ssh/ssh_host_*key*
+
+# openssh files
+COPY templates/sshd_config /opt/templates/sshd_config
+COPY files/create-sftp-user /usr/local/bin/
+COPY files/entrypoint /
+
+# snapshots cli
+COPY files/snapshots-a3cloud /usr/bin/snapshots
+
+RUN ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" \
+    && KUBECTL_VERSION="1.27.14" \
+    && curl -sLO https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/${ARCH}/kubectl && \
+    mv kubectl /usr/bin/kubectl && \
+    chmod +x /usr/bin/kubectl
+
+EXPOSE 22
+
+ENTRYPOINT ["/entrypoint"]

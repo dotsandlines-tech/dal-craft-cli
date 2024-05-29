@@ -74,6 +74,7 @@ chmod 755 "/home/$user"
 echo "export PATH=\"${PATH}\"" > /home/${user}/.profile
 
 # Inject all PATH and PHP/Composer related env configs that only root currently has!
+# a3cloud kubernetes related see https://learn.microsoft.com/en-us/visualstudio/bridge/kubernetes-environment-variables#environment-variables-table
 cat << EOF > /home/${user}/.profile
 export PATH="${PATH}"
 export PHP_VERSION="${PHP_VERSION}"
@@ -88,6 +89,17 @@ export PHP_CFLAGS="${PHP_CFLAGS}"
 export COMPOSER_HOME="${COMPOSER_HOME}"
 export PHP_ASC_URL="${PHP_ASC_URL}"
 export PHP_CPPFLAGS="${PHP_CPPFLAGS}"
+
+export KUBERNETES_SERVICE_HOST="${KUBERNETES_SERVICE_HOST}"
+export KUBERNETES_SERVICE_PORT="${KUBERNETES_SERVICE_PORT}"
+export KUBERNETES_SERVICE_PORT_HTTPS="${KUBERNETES_SERVICE_PORT_HTTPS}"
+export KUBERNETES_PORT="${KUBERNETES_PORT}"
+export KUBERNETES_PORT_443_TCP="${KUBERNETES_PORT_443_TCP}"
+export KUBERNETES_PORT_443_TCP_PROTO="${KUBERNETES_PORT_443_TCP_PROTO}"
+export KUBERNETES_PORT_443_TCP_ADDR="${KUBERNETES_PORT_443_TCP_ADDR}"
+export KUBERNETES_PORT_443_TCP_PORT="${KUBERNETES_PORT_443_TCP_PORT}"
+
+alias k=kubectl
 EOF
 
 # ensure the logged in user will start at the /app mnt-point
