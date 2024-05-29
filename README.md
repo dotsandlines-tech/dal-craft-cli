@@ -1,5 +1,7 @@
 # dal-craft-cli
 
+> **Docker Image Compability Matrix: https://github.com/dotsandlines-tech/dal-craft-cli/wiki/Compatibility-Matrix**
+
 This image marries 2-3 containers into a locked down Docker-based management cli for [craftcms](https://craftcms.com/) services - accessable via SSH:
 * [atmoz/sftp](https://github.com/atmoz/sftp)
 * [craftcms/cli](https://github.com/craftcms/docker)
@@ -231,7 +233,8 @@ export KUBERNETES_PORT_443_TCP_PORT="${KUBERNETES_PORT_443_TCP_PORT}"
 3. Push into private working branch and check GitHub Actions **build pipeline** for errors.
 4. Push into `main` branch and check Github Actions **build and publish pipeline** for errors.
 5. Push as new git tag (e.g. `v1.2.0-php8.2`, `git tag -a <TAG> -m "<msg>"`) and check Github Actions **build and publish pipeline** for errors. This will automatically publish 2 tags: `v1.2.0-php8.2-a3cloud` and `v1.2.0-php8.2-borgmatic` 
-6. Use the published docker image (e.g. `ghcr.io/dotsandlines-tech/dal-craft-cli:v1.2.0-php8.2-a3cloud`)
+6. Update the [Compatibility Matrix](https://github.com/dotsandlines-tech/dal-craft-cli/wiki/Compatibility-Matrix)
+7. Use the published docker image (e.g. `ghcr.io/dotsandlines-tech/dal-craft-cli:v1.2.0-php8.2-a3cloud`)
 
 ## How we check for security issues
 
