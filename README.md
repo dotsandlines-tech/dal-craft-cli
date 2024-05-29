@@ -1,14 +1,15 @@
 # dal-craft-cli
 
-This image marries 3 containers into a locked down Docker-based management cli for [craftcms](https://craftcms.com/) services - accessable via SSH:
+This image marries 2-3 containers into a locked down Docker-based management cli for [craftcms](https://craftcms.com/) services - accessable via SSH:
 * [atmoz/sftp](https://github.com/atmoz/sftp)
-* [witten/borgmatic](https://github.com/witten/borgmatic)
 * [craftcms/cli](https://github.com/craftcms/docker)
+* either [witten/borgmatic](https://github.com/witten/borgmatic) (the `-borgmatic` image tag variant)
+* or it simply bakes `kubectl` (the `-a3cloud` image tag variant) 
 
 The idea is to provide a minimal separate management container for craftcms services that allows:
 * locked down access **via ssh** via a set of predefined users, 
-* backup/snapshoting capabilities and
-* direct usage of the `./craft` management cli.
+* direct usage of the `./craft` management cli and
+* backup/snapshoting capabilities either via `borgmatic` or `kubectl` (CSI volume snapshots).
 
 This container may also be interesting for CI deployment steps (syncing craftcms DB / files with CI-built artifacts).
 
@@ -34,6 +35,7 @@ container:/app$ whoami
 container:/app$ id
 # uid=82(www-data) gid=82(www-data) groups=82(www-data)
 
+# -borgmatic image variant only:
 container:/app$ ./snapshots -h
 # dal-craft-cli snapshots utility
 # Usage:
@@ -46,40 +48,22 @@ container:/app$ ./snapshots -h
 #   snapshots export <snapshot>       Export <snapshot> to '/mnt/snapshots/<snapshot>.tar.gz'.
 #   snapshots restore <snapshot>      Restore <snapshot> to '/app/current/**' (hotswap).
 
+# -a3cloud image variant only:
+container:/app$ snapshots -h
+# dal-craft-cli snapshots utility (a3cloud kubectl csi volume snapshot compatible)
+# Usage:
+#   snapshots -h                      Display this help message.
+#   snapshots list|info               List available k8s volume snapshots.
+#   snapshots create                  Create a new k8s volume snapshot.
+#   snapshots print-config            Prints a3cloud k8s ConfigMap/backup-env
+#   snapshots init                    NOOP exit 0
+#   snapshots export <snapshot>       NOT IMPLEMENTED, exit 1
+#   snapshots restore <snapshot>      NOT IMPLEMENTED, exit 1
+
 container:/app$ snapshots create
-# + borgmatic --init -e none
-# + borgmatic --verbosity 1
-# /etc/borgmatic.d/config.yaml: Running command for pre-prune hook
-# Starting pruning.
-# /etc/borgmatic.d/config.yaml: Running command for pre-backup hook
-# Starting a backup.
-# /etc/borgmatic.d/config.yaml: Running command for pre-check hook
-# Starting checks.
-# /mnt/snapshots/.repo: Pruning archives
-# /mnt/snapshots/.repo: Creating archive
-# /mnt/snapshots/.repo: Removing MySQL database dumps
-# /mnt/snapshots/.repo: Dumping MySQL databases
-# Creating archive at "/mnt/snapshots/.repo::backup-{now}"
-# /mnt/snapshots/.repo: Running consistency checks
-# Starting repository check
-# Starting repository index check
-# Index object count match.
-# Completed repository check, no problems found.
-# Starting archive consistency check...
-# Analyzing archive backup-2021-05-26T10:15:22 (1/3)
-# Analyzing archive backup-2021-05-26T16:43:17 (2/3)
-# Analyzing archive backup-2021-05-27T10:30:43 (3/3)
-# Orphaned objects check skipped (needs all archives checked).
-# Archive consistency check complete, no problems found.
-# /etc/borgmatic.d/config.yaml: Running command for post-prune hook
-# Finished pruning.
-# /etc/borgmatic.d/config.yaml: Removing MySQL database dumps
-# /etc/borgmatic.d/config.yaml: Running command for post-backup hook
-# Finished a backup.
-# /etc/borgmatic.d/config.yaml: Running command for post-check hook
-# Finished checks.
-# summary:
-# /etc/borgmatic.d/config.yaml: Successfully ran configuration file
+# A new snapshot is created either via borgmatic or kubectl, see above.
+# Feel free to adapt the bash-script under /usr/bin/snapshots to your needs (mount an executable file there to overwrite)
+# For samples see files/snapshots-a3cloud or files/snapshots-borgmatic in this repo.
 
 container:/app$ cd current/
 
@@ -93,17 +77,17 @@ container:/app/current$ ./craft on
 ### Typical configuration
 
 * We mount the craftcms working directory at `/app/current`.
-* A separate backup volume is mounted at `/mnt/snapshots`, including a temporary `/dumps` directory (emptydir).
+* `-a3cloud` specific: The container simply reused the mounted service account.
+* `-borgmatic` specific: A separate backup volume is mounted at `/mnt/snapshots`, including a temporary `/dumps` directory (emptydir). The borgmatic config gets mounted at `/etc/borgmatic.d/config.yaml`.
 * Regarding `ssh` access:
   * We set the `ENV`-var `SFTP_USERS` (e.g. `<username>:<pass>:82:82:app,snapshots`) to a k8s secret to setup our sftp users and keys and additionally mount a common ssh host key at `/etc/ssh/ssh_host_ed25519_key` and `/etc/ssh/ssh_host_rsa_key`.
   * Furthermore we mount the respective user-specific ssh public keys at `/home/<username>/.ssh/keys/user-ssh-key.pub`.
   * All ssh users get uid/gid `82:82` (www-user, as used by the official craftcms images)
-  * We also mount the craftcms working directory at `/home/<username>/app` and backups at `/home/<username>/snapshots` to make them available while using `sftp`.
+  * We also mount the craftcms working directory at `/home/<username>/app` (and `-borgmatic` specific: backups at `/home/<username>/snapshots` to make them available while using `sftp`).
 * We set a the `ENV`-var `MOTD_MESSAGE` to a nice message. This is displayed to each ssh user connecting via ssh.
-* The borgmatic config gets mounted at `/etc/borgmatic.d/config.yaml`.
 
 
-### Sample borgmatic configuration
+### Sample borgmatic configuration (`-borgmatic` image only)
 
 We typically mount something like that following at `/etc/borgmatic.d/config.yaml`:
 
@@ -229,23 +213,32 @@ export PHP_CFLAGS="${PHP_CFLAGS}"
 export COMPOSER_HOME="${COMPOSER_HOME}"
 export PHP_ASC_URL="${PHP_ASC_URL}"
 export PHP_CPPFLAGS="${PHP_CPPFLAGS}"
+
+export KUBERNETES_SERVICE_HOST="${KUBERNETES_SERVICE_HOST}"
+export KUBERNETES_SERVICE_PORT="${KUBERNETES_SERVICE_PORT}"
+export KUBERNETES_SERVICE_PORT_HTTPS="${KUBERNETES_SERVICE_PORT_HTTPS}"
+export KUBERNETES_PORT="${KUBERNETES_PORT}"
+export KUBERNETES_PORT_443_TCP="${KUBERNETES_PORT_443_TCP}"
+export KUBERNETES_PORT_443_TCP_PROTO="${KUBERNETES_PORT_443_TCP_PROTO}"
+export KUBERNETES_PORT_443_TCP_ADDR="${KUBERNETES_PORT_443_TCP_ADDR}"
+export KUBERNETES_PORT_443_TCP_PORT="${KUBERNETES_PORT_443_TCP_PORT}"
 ```
 
-## Development: How to publish new images (previously)
+## Development: How to publish new images
 
-1. Replace the `Stage: cli` base image within the `Dockerfile` to your new variant from [craftcms/cli](https://hub.docker.com/r/craftcms/cli/tags?page=1&ordering=last_updated).
+1. Replace the `Stage: cli-a3cloud` base image within the `Dockerfile` to your new variant from [craftcms/cli](https://hub.docker.com/r/craftcms/cli/tags?page=1&ordering=last_updated).
 2. Replace the `IMAGE_NAME` within `build.sh`.
 3. Push into private working branch and check GitHub Actions **build pipeline** for errors.
 4. Push into `main` branch and check Github Actions **build and publish pipeline** for errors.
-5. Push as new git tag (e.g. `v1.1.15-php8.2`, `git tag -a <TAG> -m "<msg>"`) and check Github Actions **build and publish pipeline** for errors.
-6. Use the published docker image (e.g. `ghcr.io/dotsandlines-tech/dal-craft-cli:v1.1.15-php8.2`)
+5. Push as new git tag (e.g. `v1.2.0-php8.2`, `git tag -a <TAG> -m "<msg>"`) and check Github Actions **build and publish pipeline** for errors. This will automatically publish 2 tags: `v1.2.0-php8.2-a3cloud` and `v1.2.0-php8.2-borgmatic` 
+6. Use the published docker image (e.g. `ghcr.io/dotsandlines-tech/dal-craft-cli:v1.2.0-php8.2-a3cloud`)
 
 ## How we check for security issues
 
 You can run this locally.
 
 ```bash
-docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL --no-progress --ignore-unfixed dotsandlines/dal-craft-cli:v1.1.15-php8.2
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/Library/Caches:/root/.cache/ aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL --no-progress --ignore-unfixed ghcr.io/dotsandlines-tech/dal-craft-cli:v1.2.0-php8.2-a3cloud
 ```
 
 ## License

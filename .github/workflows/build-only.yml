@@ -19,8 +19,11 @@ jobs:
         run: |
           echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
-      - name: docker build
-        run: docker build --file Dockerfile --tag ${{ env.REPO }}:${{ github.sha }} .
+      - name: docker build cli-a3cloud
+        run: docker build --file Dockerfile --target cli-a3cloud --tag ${{ env.REPO }}:${{ github.sha }}-a3cloud .
+
+      - name: docker build cli-borgmatic
+        run: docker build --file Dockerfile --target cli-borgmatic --tag ${{ env.REPO }}:${{ github.sha }}-borgmatic .
       # - name: trivy scan
       #   uses: aquasecurity/trivy-action@master
       #   with:

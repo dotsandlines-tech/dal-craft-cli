@@ -1,5 +1,5 @@
 # https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
-name: Create and publish project
+name: Create and publish image -borgmatic
 
 on:
   push:
@@ -38,13 +38,18 @@ jobs:
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: ${{ env.REGISTRY }}/${{ env.REPO }}
+          flavor: |
+            latest=auto
+            prefix=
+            suffix=-borgmatic
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image cli-borgmatic
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
           push: true
+          target: cli-borgmatic
           tags: |
             ${{ steps.meta.outputs.tags }}
-            ${{ env.REGISTRY }}/${{ env.REPO }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.REPO }}:${{ github.sha }}-borgmatic
           labels: ${{ steps.meta.outputs.labels }}
