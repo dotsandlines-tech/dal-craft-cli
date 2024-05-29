@@ -1,14 +1,14 @@
 ### -----------------------
 # --- Stage: cli-a3cloud
 # --- Purpose: Image for actual deployment
-# --- Current PHP version: 8.1.28
+# --- Current PHP version: 8.0.30
 # --- https://github.com/craftcms/docker
 # --- https://github.com/atmoz/sftp/blob/master/Dockerfile
 # See https://hub.docker.com/r/craftcms/cli/tags
 # See https://hub.docker.com/r/craftcms/php-fpm/tags
-# -> craftcms/php-fpm:8.1@sha256:1e3db74acb8a42632f01bdf6f8f1de3cb3a74e9f840cceb1e76586258ab98062
+# -> craftcms/php-fpm:8.0@sha256:130f3b10077b7c2c5b21e9e154388ff0889f3f7ea8d29e26df05a62c3837e71a
 ### -----------------------
-FROM craftcms/cli:8.1@sha256:7b407540a6950e2e7d0fcd75134b8ce03d726c0366b5b12ec9cca2cdb9d9aa22 as cli-a3cloud
+FROM craftcms/cli:8.0@sha256:9c0b63b029394f899bb59745a9ed0e43058e01cfeeaf9d2ad8721236b8f68c89 as cli-a3cloud
 
 # switch back to the root user (we will spawn the actual queue through the **www-data** user later.)
 # this user is used to actually run the container as we will spawn a ssh-server
