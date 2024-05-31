@@ -13,6 +13,9 @@ usage() {
     echo "  snapshots restore <snapshot>      NOT IMPLEMENTED, exit 1"
 }
 
+# auto-source the profile (if the was not sourced before)
+source ~/.profile || true
+
 # no options supplied?
 if [ -z "$1" ]; then
     usage
