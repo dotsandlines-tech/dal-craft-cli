@@ -101,6 +101,16 @@ export KUBERNETES_PORT_443_TCP_PORT="${KUBERNETES_PORT_443_TCP_PORT}"
 alias k=kubectl
 EOF
 
+# readd all BAK_* env vars
+env | grep -E "^BAK_" | while read -r line; do
+    echo "export $line" >> /home/${user}/.profile
+done || true
+
+# readd all BACKUP_JOB_* env vars
+env | grep -E "^BACKUP_JOB_" | while read -r line; do
+    echo "export $line" >> /home/${user}/.profile
+done || true
+
 # ensure the logged in user will start at the /app mnt-point
 echo "cd /app" >> /home/${user}/.profile
 
