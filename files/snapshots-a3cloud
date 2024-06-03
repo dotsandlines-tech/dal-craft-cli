@@ -61,28 +61,7 @@ case "$subcommand" in
 
     create)
     set -Eeox pipefail
-
-    echo "Ensuring there is no other backup job running..."
-    kubectl get job -l app=backup
-
-    # ensure there is currently no other backup job running, if that is the case, exit 1
-    if kubectl get job -l app=backup -o jsonpath='{.items[*].status.active}' | grep -q "1"; then
-        >&2 echo "Another backup job is currently running, exit 1!"
-        exit 1
-    fi
-
-    timestamp=$(date +"%Y-%m-%d-%H%M%S")
-
-    # we provide the additional env vars (via yq)
-    # BAK_LABEL_VS_TYPE: adhoc (flag for adhoc backup job)
-    # BAK_LABEL_VS_RETAIN: days (flag for retention policy, currently only days is supported)
-    kubectl create job --from=cronjob.batch/backup "backup-adhoc-${timestamp}" -o yaml --dry-run=client \
-        | yq eval '.spec.template.spec.containers[0].env += [{"name": "BAK_LABEL_VS_TYPE", "value": "adhoc"}]' - \
-        | yq eval '.spec.template.spec.containers[0].env += [{"name": "BAK_LABEL_VS_RETAIN", "value": "days"}]' - \
-        | kubectl apply -f -
-
-    sleep 5
-    kubectl wait --for=condition=complete --timeout=5m "job/backup-adhoc-${timestamp}"
+    /usr/bin/backup-ns.sh
     ;;
 
     export)

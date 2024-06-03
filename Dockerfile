@@ -49,6 +49,7 @@ COPY files/entrypoint /
 
 # snapshots cli
 COPY --chmod=0755 files/snapshots-a3cloud /usr/bin/snapshots
+COPY --chmod=0755 files/backup-ns.sh /usr/bin/backup-ns.sh
 
 RUN ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" \
     && KUBECTL_VERSION="1.27.14" \
